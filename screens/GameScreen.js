@@ -1,6 +1,6 @@
 // src/screens/GameScreen.js
 import React, { useEffect, useState } from "react";
-import { View, Text, Button } from "react-native";
+import { View, Text, Button, Alert, Share } from "react-native";
 import { DeviceMotion } from "expo-sensors";
 
 export default function GameScreen() {
@@ -26,6 +26,27 @@ export default function GameScreen() {
     // cleanup on unmount
     return () => subscription.remove();
   }, [set_color, paused]);
+
+  const share = async (color) => {
+    try {
+      const result = await Share.share({
+        message: `Check out this wonderful color: ${color}`,
+      });
+
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          console.log("shared with activity type of", result.activityType);
+        } else {
+          console.log("shared");
+        }
+      } else if (result.action === Share.dismissedAction) {
+        console.log("dismissed");
+      }
+    } catch (error) {
+      Alert.alert(error.message);
+      console.log("failed sharing:", error);
+    }
+  };
 
   return (
     <View
@@ -55,6 +76,12 @@ export default function GameScreen() {
           }}
         />
       </View>
+      <Button
+        title="Share this color!"
+        onPress={() => {
+          share(color);
+        }}
+      />
     </View>
   );
 }
